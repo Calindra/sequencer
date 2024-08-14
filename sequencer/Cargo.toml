@@ -1,0 +1,13 @@
+[package]
+name = "sequencer"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "sequencer"
+crate-type = ["cdylib"]
+
+[build-dependencies]
+cbindgen ={ version="0.26.0" }
+
+[dependencies]

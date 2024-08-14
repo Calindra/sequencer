@@ -13,12 +13,22 @@ use std::{
 [11 roothash
 
 */
+
 const FOUR_KB: usize = 4 * 1024;
-// const THRB: usize = 32;
 
-type Group = [u8; FOUR_KB];
+pub type Group = [u8; FOUR_KB];
 
-fn get_bytes_from_asset(reader: &mut BufReader<File>) -> Result<Vec<Group>, Box<dyn Error>> {
+// #[no_mangle]
+// pub extern "C" fn some_func() {
+//     println!("Hello from Rust");
+// }
+
+pub extern "C" fn get_bytes_from_asset<T>(
+    reader: &mut BufReader<T>,
+) -> Result<Vec<Group>, Box<dyn Error>>
+where
+    T: Read,
+{
     let mut output = vec![];
 
     // let mut is_start = true;
@@ -38,7 +48,7 @@ fn get_bytes_from_asset(reader: &mut BufReader<File>) -> Result<Vec<Group>, Box<
     Ok(output)
 }
 
-fn open_file_create_reader(path_str: &str) -> Result<BufReader<File>, Box<dyn Error>> {
+pub fn open_file_create_reader(path_str: &str) -> Result<BufReader<File>, Box<dyn Error>> {
     let path = Path::new(path_str);
 
     if !path.exists() {
@@ -51,11 +61,20 @@ fn open_file_create_reader(path_str: &str) -> Result<BufReader<File>, Box<dyn Er
     Ok(reader)
 }
 
-fn main() {
-    let example = "assets/example.jpg";
-    let mut reader = open_file_create_reader(example).unwrap();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let bytes = get_bytes_from_asset(&mut reader).unwrap();
-    let res = bytes.iter().map(hex::encode).collect::<Vec<String>>();
-    dbg!(res);
+    struct FakeFile {}
+
+    impl Read for FakeFile {
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            Ok(0)
+        }
+    }
+
+    #[test]
+    fn test_get_bytes_from_asset() {
+        let mock_file: Group = [0; FOUR_KB];
+    }
 }
